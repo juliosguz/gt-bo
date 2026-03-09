@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useNavigate } from 'react-router';
+import { useAuth } from '../hooks/use-auth';
 
 const navItems = [
   { to: '/', label: 'Dashboard' },
@@ -6,6 +7,14 @@ const navItems = [
 ];
 
 export default function Layout() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <div className="drawer lg:drawer-open min-h-screen">
       <input id="sidebar" type="checkbox" className="drawer-toggle" />
@@ -42,6 +51,29 @@ export default function Layout() {
               </li>
             ))}
           </ul>
+
+          {user && (
+            <div className="border-t border-base-300 p-4">
+              <div className="flex items-center gap-3">
+                <div className="avatar">
+                  <div className="w-9 rounded-full">
+                    <img src={user.picture} alt={user.name} referrerPolicy="no-referrer" />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{user.name}</p>
+                  <p className="text-xs text-base-content/60 truncate">{user.email}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm w-full mt-2"
+                onClick={handleLogout}
+              >
+                Sign out
+              </button>
+            </div>
+          )}
         </aside>
       </div>
     </div>
