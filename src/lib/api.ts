@@ -23,8 +23,10 @@ export async function apiFetch<T>(
 
   if (response.status === 401) {
     clearAuthStorage();
-    window.location.href = '/login';
-    throw new Error('Session expired');
+    if (window.location.pathname !== '/login' && window.location.pathname !== '/login/') {
+      window.location.href = '/login';
+      throw new Error('Session expired');
+    }
   }
 
   if (!response.ok) {
