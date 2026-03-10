@@ -7,7 +7,7 @@ const USER_KEY = 'auth_user';
 export function loginWithGoogle(credential: string): Promise<AuthResponse> {
   return apiFetch<AuthResponse>('/auth/google', {
     method: 'POST',
-    body: JSON.stringify({ credential }),
+    body: JSON.stringify({ credential, context: 'backoffice' }),
   });
 }
 
