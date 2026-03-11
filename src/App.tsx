@@ -6,6 +6,7 @@ import DashboardPage from './pages/dashboard';
 import StoresListPage from './pages/stores/index';
 import StoresNewPage from './pages/stores/new';
 import StoresEditPage from './pages/stores/edit';
+import ProfilePage from './pages/profile';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="stores" element={<StoresListPage />} />
           <Route path="stores/new" element={<StoresNewPage />} />
           <Route path="stores/:id/edit" element={<StoresEditPage />} />

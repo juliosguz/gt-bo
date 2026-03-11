@@ -10,6 +10,7 @@ import {
   clearAuthStorage,
 } from '../services/auth.service';
 import { AuthContext } from './auth.context';
+import type { User } from '../types/auth';
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState(() => getStoredUser());
@@ -42,6 +43,15 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     setUser(response.user);
   }, []);
 
+  const updateUser = useCallback((data: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updatedUser = { ...prev, ...data };
+      setStoredUser(updatedUser);
+      return updatedUser;
+    });
+  }, []);
+
   const logout = useCallback(() => {
     clearAuthStorage();
     setToken(null);
@@ -55,6 +65,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !!token,
       login,
       verify2FA,
+      updateUser,
       logout,
     }}>
       {children}

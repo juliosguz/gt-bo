@@ -1,4 +1,4 @@
-export interface User {
+export type User = {
   id: string;
   email: string;
   name: string;
@@ -6,16 +6,16 @@ export interface User {
   roles?: string[];
   permissions?: string[];
   isTwoFactorEnabled?: boolean;
-}
+};
 
-export interface AuthSuccessResponse {
+export type AuthSuccessResponse = {
   accessToken: string;
   user: User;
-}
+};
 
-export interface Auth2FARequiredResponse {
+export type Auth2FARequiredResponse ={
   requires2FA: boolean;
   tempToken: string;
-}
+};
 
 export type AuthResponse = AuthSuccessResponse | Auth2FARequiredResponse;

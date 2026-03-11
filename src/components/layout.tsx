@@ -54,7 +54,10 @@ export default function Layout() {
 
           {user && (
             <div className="border-t border-base-300 p-4">
-              <div className="flex items-center gap-3">
+              <NavLink 
+                to="/profile" 
+                className={({ isActive }) => `flex items-center gap-3 p-2 rounded-lg transition-colors hover:bg-base-300 ${isActive ? 'bg-base-300' : ''}`}
+              >
                 <div className="avatar">
                   <div className="w-9 rounded-full">
                     <img src={user.picture} alt={user.name} referrerPolicy="no-referrer" />
@@ -64,7 +67,7 @@ export default function Layout() {
                   <p className="text-sm font-medium truncate">{user.name}</p>
                   <p className="text-xs text-base-content/60 truncate">{user.email}</p>
                 </div>
-              </div>
+              </NavLink>
               <button
                 type="button"
                 className="btn btn-ghost btn-sm w-full mt-2"

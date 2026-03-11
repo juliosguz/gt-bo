@@ -7,6 +7,7 @@ export interface AuthContextValue {
   isAuthenticated: boolean;
   login: (credential: string) => Promise<{ requires2FA?: boolean; tempToken?: string }>;
   verify2FA: (tempToken: string, token: string) => Promise<void>;
+  updateUser: (data: Partial<User>) => void;
   logout: () => void;
 }
 
