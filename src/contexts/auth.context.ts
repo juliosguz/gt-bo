@@ -5,7 +5,8 @@ export interface AuthContextValue {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (credential: string) => Promise<void>;
+  login: (credential: string) => Promise<{ requires2FA?: boolean; tempToken?: string }>;
+  verify2FA: (tempToken: string, token: string) => Promise<void>;
   logout: () => void;
 }
 

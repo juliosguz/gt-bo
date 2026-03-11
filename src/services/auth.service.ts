@@ -1,5 +1,5 @@
 import { apiFetch } from '../lib/api';
-import type { AuthResponse, User } from '../types/auth';
+import type { AuthResponse, AuthSuccessResponse, User } from '../types/auth';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
@@ -8,6 +8,33 @@ export function loginWithGoogle(credential: string): Promise<AuthResponse> {
   return apiFetch<AuthResponse>('/auth/google', {
     method: 'POST',
     body: JSON.stringify({ credential, context: 'backoffice' }),
+  });
+}
+
+export function verify2FA(tempToken: string, token: string): Promise<AuthSuccessResponse> {
+  return apiFetch<AuthSuccessResponse>('/auth/2fa/verify', {
+    method: 'POST',
+    body: JSON.stringify({ tempToken, token }),
+  });
+}
+
+export function generate2FA(): Promise<{ uri: string }> {
+  return apiFetch<{ uri: string }>('/auth/2fa/generate', {
+    method: 'POST',
+  });
+}
+
+export function enable2FA(token: string): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>('/auth/2fa/enable', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+}
+
+export function disable2FA(token: string): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>('/auth/2fa/disable', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
   });
 }
 
