@@ -6,6 +6,12 @@ import DashboardPage from './pages/dashboard';
 import StoresListPage from './pages/stores/index';
 import StoresNewPage from './pages/stores/new';
 import StoresEditPage from './pages/stores/edit';
+import UsersListPage from './pages/users/index';
+import UsersNewPage from './pages/users/new';
+import UsersEditPage from './pages/users/edit';
+import RolesListPage from './pages/roles/index';
+import RolesNewPage from './pages/roles/new';
+import RolesDetailPage from './pages/roles/detail';
 import ProfilePage from './pages/profile';
 
 export default function App() {
@@ -19,6 +25,12 @@ export default function App() {
           <Route path="stores" element={<StoresListPage />} />
           <Route path="stores/new" element={<StoresNewPage />} />
           <Route path="stores/:id/edit" element={<StoresEditPage />} />
+          <Route path="users" element={<UsersListPage />} />
+          <Route path="users/new" element={<UsersNewPage />} />
+          <Route path="users/:id/edit" element={<UsersEditPage />} />
+          <Route path="roles" element={<RolesListPage />} />
+          <Route path="roles/new" element={<RolesNewPage />} />
+          <Route path="roles/:role" element={<RolesDetailPage />} />
         </Route>
       </Route>
     </Routes>
