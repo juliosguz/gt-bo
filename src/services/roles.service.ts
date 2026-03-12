@@ -1,12 +1,12 @@
 import { apiFetch } from '../lib/api';
-import type { Role, CreateRoleDto } from '../types/role';
+import type { Role, RoleDetail, Permission, CreateRoleDto } from '../types/role';
 
 export function getRoles(): Promise<Role[]> {
   return apiFetch<Role[]>('/roles');
 }
 
-export function getRole(role: string): Promise<Role> {
-  return apiFetch<Role>(`/roles/${role}`);
+export function getRole(role: string): Promise<RoleDetail> {
+  return apiFetch<RoleDetail>(`/roles/${role}`);
 }
 
 export function createRole(data: CreateRoleDto): Promise<Role> {
@@ -22,8 +22,8 @@ export function deleteRole(role: string): Promise<void> {
   });
 }
 
-export function getPermissions(): Promise<string[]> {
-  return apiFetch<string[]>('/roles/permissions');
+export function getPermissions(): Promise<Permission[]> {
+  return apiFetch<Permission[]>('/roles/permissions');
 }
 
 export function addPermission(role: string, permission: string): Promise<void> {

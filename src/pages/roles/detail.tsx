@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router';
 import { useRole, usePermissions, useReplacePermissions } from '../../hooks/use-roles';
+import type { Permission } from '../../types/role';
 
 function PermissionsEditor({
   roleName,
@@ -9,7 +10,7 @@ function PermissionsEditor({
 }: {
   roleName: string;
   initialPermissions: string[];
-  allPermissions: string[];
+  allPermissions: Permission[];
 }) {
   const replaceMutation = useReplacePermissions();
   const [selected, setSelected] = useState<Set<string>>(() => new Set(initialPermissions));
@@ -36,8 +37,8 @@ function PermissionsEditor({
   }
 
   const grouped = useMemo(() => {
-    return allPermissions.reduce<Record<string, string[]>>((acc, perm) => {
-      const parts = perm.split(':');
+    return allPermissions.reduce<Record<string, Permission[]>>((acc, perm) => {
+      const parts = perm.permission.split(':');
       const group = parts.length >= 2 ? `${parts[0]}:${parts[1]}` : parts[0];
       if (!acc[group]) acc[group] = [];
       acc[group].push(perm);
@@ -74,15 +75,19 @@ function PermissionsEditor({
             <div key={group}>
               <h3 className="font-semibold text-sm uppercase tracking-wide opacity-70 mb-2">{group}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {perms.sort().map((perm) => (
-                  <label key={perm} className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-base-200">
+                {perms.sort((a, b) => a.permission.localeCompare(b.permission)).map((perm) => (
+                  <label
+                    key={perm.permission}
+                    className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-base-200"
+                    title={perm.description}
+                  >
                     <input
                       type="checkbox"
                       className="checkbox checkbox-primary checkbox-sm"
-                      checked={selected.has(perm)}
-                      onChange={() => togglePermission(perm)}
+                      checked={selected.has(perm.permission)}
+                      onChange={() => togglePermission(perm.permission)}
                     />
-                    <span className="text-sm font-mono">{perm}</span>
+                    <span className="text-sm font-mono">{perm.permission}</span>
                   </label>
                 ))}
               </div>

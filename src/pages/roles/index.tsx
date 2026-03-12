@@ -50,7 +50,7 @@ export default function RolesListPage() {
           <thead>
             <tr>
               <th>Role</th>
-              <th>Permissions</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -63,7 +63,7 @@ export default function RolesListPage() {
                   </Link>
                 </td>
                 <td>
-                  <span className="badge badge-ghost">{r.permissions?.length ?? 0} permissions</span>
+                  {r.isProtected && <span className="badge badge-warning badge-sm">Protected</span>}
                 </td>
                 <td className="flex gap-2">
                   <Link to={`/roles/${r.role}`} className="btn btn-sm btn-ghost">
@@ -72,6 +72,7 @@ export default function RolesListPage() {
                   <button
                     className="btn btn-sm btn-ghost text-error"
                     onClick={() => setDeleteTarget(r.role)}
+                    disabled={r.isProtected}
                   >
                     Delete
                   </button>
