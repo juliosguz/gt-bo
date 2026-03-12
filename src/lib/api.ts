@@ -34,7 +34,7 @@ export async function apiFetch<T>(
     throw new Error(error.message ?? `Request failed with status ${response.status}`);
   }
 
-  if (response.status === 204) {
+  if (response.status === 204 || response.headers.get('content-length') === '0') {
     return undefined as T;
   }
 
