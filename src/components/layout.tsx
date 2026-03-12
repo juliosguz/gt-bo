@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { useAuth } from '../hooks/use-auth';
+import UserAvatar from './user-avatar';
 
 const navItems = [
   { to: '/', label: 'Dashboard' },
@@ -60,11 +61,7 @@ export default function Layout() {
                 to="/profile" 
                 className={({ isActive }) => `flex items-center gap-3 p-2 rounded-lg transition-colors hover:bg-base-300 ${isActive ? 'bg-base-300' : ''}`}
               >
-                <div className="avatar">
-                  <div className="w-9 rounded-full">
-                    <img src={user.picture} alt={user.name} referrerPolicy="no-referrer" />
-                  </div>
-                </div>
+                <UserAvatar name={user.name} picture={user.picture} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{user.name}</p>
                   <p className="text-xs text-base-content/60 truncate">{user.email}</p>

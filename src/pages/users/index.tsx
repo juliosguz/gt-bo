@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { useUsers, useDeleteUser } from '../../hooks/use-users';
 import ConfirmDialog from '../../components/confirm-dialog';
+import UserAvatar from '../../components/user-avatar';
 
 export default function UsersListPage() {
   const { data: users, isLoading, error } = useUsers();
@@ -47,7 +48,12 @@ export default function UsersListPage() {
           <tbody>
             {users?.map((user) => (
               <tr key={user.id}>
-                <td className="font-medium">{user.firstName} {user.lastName}</td>
+                <td>
+                  <div className="flex items-center gap-3">
+                    <UserAvatar name={`${user.firstName} ${user.lastName}`} picture={user.picture} size="w-8" />
+                    <span className="font-medium">{user.firstName} {user.lastName}</span>
+                  </div>
+                </td>
                 <td className="text-sm">{user.email}</td>
                 <td>
                   <div className="flex flex-wrap gap-1">
