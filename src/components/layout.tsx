@@ -4,6 +4,8 @@ import { useAuth } from '../hooks/use-auth';
 const navItems = [
   { to: '/', label: 'Dashboard' },
   { to: '/stores', label: 'Stores' },
+  { to: '/users', label: 'Users' },
+  { to: '/roles', label: 'Roles' },
 ];
 
 export default function Layout() {
