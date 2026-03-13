@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router';
 import Layout from './components/layout';
 import ProtectedRoute from './components/protected-route';
+import CapabilityRoute from './components/capability-route';
 import LoginPage from './pages/login';
 import DashboardPage from './pages/dashboard';
 import StoresListPage from './pages/stores/index';
@@ -22,12 +23,20 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<DashboardPage />} />
           <Route path="profile" element={<ProfilePage />} />
-          <Route path="stores" element={<StoresListPage />} />
-          <Route path="stores/new" element={<StoresNewPage />} />
-          <Route path="stores/:id/edit" element={<StoresEditPage />} />
-          <Route path="users" element={<UsersListPage />} />
-          <Route path="users/new" element={<UsersNewPage />} />
-          <Route path="users/:id/edit" element={<UsersEditPage />} />
+          <Route element={<CapabilityRoute check={(c) => c.stores.read} />}>
+            <Route path="stores" element={<StoresListPage />} />
+            <Route path="stores/:id/edit" element={<StoresEditPage />} />
+          </Route>
+          <Route element={<CapabilityRoute check={(c) => c.stores.create} />}>
+            <Route path="stores/new" element={<StoresNewPage />} />
+          </Route>
+          <Route element={<CapabilityRoute check={(c) => c.users.read} />}>
+            <Route path="users" element={<UsersListPage />} />
+            <Route path="users/:id/edit" element={<UsersEditPage />} />
+          </Route>
+          <Route element={<CapabilityRoute check={(c) => c.users.create} />}>
+            <Route path="users/new" element={<UsersNewPage />} />
+          </Route>
           <Route path="roles" element={<RolesListPage />} />
           <Route path="roles/new" element={<RolesNewPage />} />
           <Route path="roles/:role" element={<RolesDetailPage />} />
