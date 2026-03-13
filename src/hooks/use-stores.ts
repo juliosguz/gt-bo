@@ -4,10 +4,11 @@ import * as storesService from '../services/stores.service';
 
 const STORES_KEY = ['stores'] as const;
 
-export function useStores() {
+export function useStores(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: STORES_KEY,
     queryFn: storesService.getStores,
+    enabled: options?.enabled,
   });
 }
 
