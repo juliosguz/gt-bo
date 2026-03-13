@@ -1,17 +1,20 @@
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { useAuth } from '../hooks/use-auth';
 import UserAvatar from './user-avatar';
+import type { Capabilities } from '../types/auth';
 
-const navItems = [
+const navItems: { to: string; label: string; check?: (c: Capabilities) => boolean }[] = [
   { to: '/', label: 'Dashboard' },
-  { to: '/stores', label: 'Stores' },
-  { to: '/users', label: 'Users' },
+  { to: '/stores', label: 'Stores', check: (c) => c.stores.read },
+  { to: '/users', label: 'Users', check: (c) => c.users.read },
   { to: '/roles', label: 'Roles' },
 ];
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const caps = user?.capabilities;
+  const visibleNavItems = navItems.filter((item) => !item.check || (caps && item.check(caps)));
 
   const handleLogout = () => {
     logout();
@@ -42,7 +45,7 @@ export default function Layout() {
         <aside className="bg-base-200 w-64 min-h-full flex flex-col">
           <div className="p-4 text-xl font-bold">GT Backoffice</div>
           <ul className="menu flex-1 px-2">
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <li key={item.to}>
                 <NavLink
                   to={item.to}
