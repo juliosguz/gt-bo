@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { useStores, useDeleteStore } from '../../hooks/use-stores';
+import { useAuth } from '../../hooks/use-auth';
 import ConfirmDialog from '../../components/confirm-dialog';
 
 export default function StoresListPage() {
+  const { user } = useAuth();
+  const storeCaps = user?.capabilities?.stores;
   const { data: stores, isLoading, error } = useStores();
   const deleteMutation = useDeleteStore();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const storeToDelete = stores?.find((s) => s.id === deleteId);
+  const hasActions = storeCaps?.update || storeCaps?.delete;
 
   function handleDelete() {
     if (!deleteId) return;
@@ -29,9 +33,11 @@ export default function StoresListPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Stores</h1>
-        <Link to="/stores/new" className="btn btn-primary">
-          + New Store
-        </Link>
+        {storeCaps?.create && (
+          <Link to="/stores/new" className="btn btn-primary">
+            + New Store
+          </Link>
+        )}
       </div>
 
       <div className="overflow-x-auto">
@@ -42,7 +48,7 @@ export default function StoresListPage() {
               <th>URL</th>
               <th>Category</th>
               <th>Status</th>
-              <th>Actions</th>
+              {hasActions && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -60,34 +66,42 @@ export default function StoresListPage() {
                     {store.active ? 'Active' : 'Inactive'}
                   </span>
                 </td>
-                <td className="flex gap-2">
-                  <Link to={`/stores/${store.id}/edit`} className="btn btn-sm btn-ghost">
-                    Edit
-                  </Link>
-                  <button
-                    className="btn btn-sm btn-ghost text-error"
-                    onClick={() => setDeleteId(store.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+                {hasActions && (
+                  <td className="flex gap-2">
+                    {storeCaps?.update && (
+                      <Link to={`/stores/${store.id}/edit`} className="btn btn-sm btn-ghost">
+                        Edit
+                      </Link>
+                    )}
+                    {storeCaps?.delete && (
+                      <button
+                        className="btn btn-sm btn-ghost text-error"
+                        onClick={() => setDeleteId(store.id)}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
             {stores?.length === 0 && (
-              <tr><td colSpan={5} className="text-center opacity-60">No stores yet</td></tr>
+              <tr><td colSpan={hasActions ? 5 : 4} className="text-center opacity-60">No stores yet</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <ConfirmDialog
-        open={!!deleteId}
-        title="Delete Store"
-        message={`Are you sure you want to delete "${storeToDelete?.name}"? This action cannot be undone.`}
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteId(null)}
-        isLoading={deleteMutation.isPending}
-      />
+      {storeCaps?.delete && (
+        <ConfirmDialog
+          open={!!deleteId}
+          title="Delete Store"
+          message={`Are you sure you want to delete "${storeToDelete?.name}"? This action cannot be undone.`}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteId(null)}
+          isLoading={deleteMutation.isPending}
+        />
+      )}
     </div>
   );
 }
