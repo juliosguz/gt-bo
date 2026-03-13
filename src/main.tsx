@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import AuthProvider from './contexts/auth.provider';
+import ToastContainer from './components/toast';
 import './index.css';
 import App from './App';
 
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
             <App />
           </AuthProvider>
         </QueryClientProvider>
+        <ToastContainer />
       </BrowserRouter>
     </GoogleOAuthProvider>
   </StrictMode>,
