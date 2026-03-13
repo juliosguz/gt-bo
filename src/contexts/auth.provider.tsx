@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import {
   loginWithGoogle as loginWithGoogleService,
@@ -13,31 +13,62 @@ import {
 import { AuthContext } from './auth.context';
 import type { User } from '../types/auth';
 
+const INACTIVITY_THRESHOLD_MS = 5 * 60 * 1000;
+
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState(() => getStoredUser());
   const [token, setToken] = useState(() => getStoredToken());
   const [isLoading, setIsLoading] = useState(() => !!getStoredToken());
+  const hiddenSince = useRef<number | null>(null);
+
+  const refreshCapabilities = useCallback(async () => {
+    try {
+      const freshUser = await getMe();
+      setUser(freshUser);
+      setStoredUser(freshUser);
+    } catch {
+      // 401 handled by apiFetch
+    }
+  }, []);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      return;
+    }
 
-    let cancelled = false;
+    const controller = new AbortController();
 
     getMe()
       .then((freshUser) => {
-        if (cancelled) return;
-        setUser(freshUser);
-        setStoredUser(freshUser);
+        if (!controller.signal.aborted) {
+          setUser(freshUser);
+          setStoredUser(freshUser);
+        }
       })
-      .catch(() => {
-        // 401 is handled by apiFetch (clears storage and redirects)
-      })
+      .catch(() => {})
       .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => controller.abort();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        hiddenSince.current = Date.now();
+      } else if (hiddenSince.current && token) {
+        const elapsed = Date.now() - hiddenSince.current;
+        hiddenSince.current = null;
+        if (elapsed >= INACTIVITY_THRESHOLD_MS) {
+          refreshCapabilities();
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [token, refreshCapabilities]);
 
   const login = useCallback(async (credential: string) => {
     const response = await loginWithGoogleService(credential);
@@ -90,6 +121,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       login,
       verify2FA,
       updateUser,
+      refreshCapabilities,
       logout,
     }}>
       {children}
