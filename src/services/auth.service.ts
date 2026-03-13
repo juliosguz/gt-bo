@@ -38,6 +38,10 @@ export function disable2FA(token: string): Promise<{ success: boolean }> {
   });
 }
 
+export function getMe(): Promise<User> {
+  return apiFetch<User>('/auth/me');
+}
+
 export function getStoredToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }
