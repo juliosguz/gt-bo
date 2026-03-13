@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import {
   loginWithGoogle as loginWithGoogleService,
   verify2FA as verify2FAService,
+  getMe,
   getStoredToken,
   getStoredUser,
   setStoredToken,
@@ -15,6 +16,28 @@ import type { User } from '../types/auth';
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState(() => getStoredUser());
   const [token, setToken] = useState(() => getStoredToken());
+  const [isLoading, setIsLoading] = useState(() => !!getStoredToken());
+
+  useEffect(() => {
+    if (!token) return;
+
+    let cancelled = false;
+
+    getMe()
+      .then((freshUser) => {
+        if (cancelled) return;
+        setUser(freshUser);
+        setStoredUser(freshUser);
+      })
+      .catch(() => {
+        // 401 is handled by apiFetch (clears storage and redirects)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = useCallback(async (credential: string) => {
     const response = await loginWithGoogleService(credential);
@@ -63,6 +86,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       user,
       token,
       isAuthenticated: !!token,
+      isLoading,
       login,
       verify2FA,
       updateUser,
