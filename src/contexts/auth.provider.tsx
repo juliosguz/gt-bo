@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import {
   loginWithGoogle as loginWithGoogleService,
@@ -21,37 +21,32 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(() => !!getStoredToken());
   const hiddenSince = useRef<number | null>(null);
 
+  const isRefreshing = useRef(false);
+
   const refreshCapabilities = useCallback(async () => {
+    if (isRefreshing.current) return;
+    isRefreshing.current = true;
     try {
       const freshUser = await getMe();
       setUser(freshUser);
       setStoredUser(freshUser);
-    } catch {
-      // 401 handled by apiFetch
+    } catch (err) {
+      console.error('Failed to refresh capabilities:', err);
+    } finally {
+      isRefreshing.current = false;
     }
   }, []);
 
   useEffect(() => {
     if (!token) {
+      setIsLoading(false);
       return;
     }
 
-    const controller = new AbortController();
-
-    getMe()
-      .then((freshUser) => {
-        if (!controller.signal.aborted) {
-          setUser(freshUser);
-          setStoredUser(freshUser);
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false);
-      });
-
-    return () => controller.abort();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    refreshCapabilities().finally(() => {
+      setIsLoading(false);
+    });
+  }, [token, refreshCapabilities]);
 
   useEffect(() => {
     function handleVisibilityChange() {
@@ -112,18 +107,20 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const value = useMemo(() => ({
+    user,
+    token,
+    isAuthenticated: !!token,
+    isLoading,
+    login,
+    verify2FA,
+    updateUser,
+    refreshCapabilities,
+    logout,
+  }), [user, token, isLoading, login, verify2FA, updateUser, refreshCapabilities, logout]);
+
   return (
-    <AuthContext value={{
-      user,
-      token,
-      isAuthenticated: !!token,
-      isLoading,
-      login,
-      verify2FA,
-      updateUser,
-      refreshCapabilities,
-      logout,
-    }}>
+    <AuthContext value={value}>
       {children}
     </AuthContext>
   );
