@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { useUsers, useDeleteUser } from '../../hooks/use-users';
+import { useAuth } from '../../hooks/use-auth';
 import ConfirmDialog from '../../components/confirm-dialog';
 import UserAvatar from '../../components/user-avatar';
 
 export default function UsersListPage() {
+  const { user: currentUser } = useAuth();
+  const userCaps = currentUser?.capabilities?.users;
   const { data: users, isLoading, error } = useUsers();
   const deleteMutation = useDeleteUser();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const userToDelete = users?.find((u) => u.id === deleteId);
+  const hasActions = userCaps?.update || userCaps?.delete;
 
   function handleDelete() {
     if (!deleteId) return;
@@ -30,9 +34,11 @@ export default function UsersListPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Users</h1>
-        <Link to="/users/new" className="btn btn-primary">
-          + New User
-        </Link>
+        {userCaps?.create && (
+          <Link to="/users/new" className="btn btn-primary">
+            + New User
+          </Link>
+        )}
       </div>
 
       <div className="overflow-x-auto">
@@ -42,7 +48,7 @@ export default function UsersListPage() {
               <th>Name</th>
               <th>Email</th>
               <th>Roles</th>
-              <th>Actions</th>
+              {hasActions && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -66,34 +72,42 @@ export default function UsersListPage() {
                     )}
                   </div>
                 </td>
-                <td className="flex gap-2">
-                  <Link to={`/users/${user.id}/edit`} className="btn btn-sm btn-ghost">
-                    Edit
-                  </Link>
-                  <button
-                    className="btn btn-sm btn-ghost text-error"
-                    onClick={() => setDeleteId(user.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+                {hasActions && (
+                  <td className="flex gap-2">
+                    {userCaps?.update && (
+                      <Link to={`/users/${user.id}/edit`} className="btn btn-sm btn-ghost">
+                        Edit
+                      </Link>
+                    )}
+                    {userCaps?.delete && (
+                      <button
+                        className="btn btn-sm btn-ghost text-error"
+                        onClick={() => setDeleteId(user.id)}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
             {users?.length === 0 && (
-              <tr><td colSpan={4} className="text-center opacity-60">No users yet</td></tr>
+              <tr><td colSpan={hasActions ? 4 : 3} className="text-center opacity-60">No users yet</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <ConfirmDialog
-        open={!!deleteId}
-        title="Delete User"
-        message={`Are you sure you want to delete "${userToDelete?.firstName} ${userToDelete?.lastName}"? This action cannot be undone.`}
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteId(null)}
-        isLoading={deleteMutation.isPending}
-      />
+      {userCaps?.delete && (
+        <ConfirmDialog
+          open={!!deleteId}
+          title="Delete User"
+          message={`Are you sure you want to delete "${userToDelete?.firstName} ${userToDelete?.lastName}"? This action cannot be undone.`}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteId(null)}
+          isLoading={deleteMutation.isPending}
+        />
+      )}
     </div>
   );
 }

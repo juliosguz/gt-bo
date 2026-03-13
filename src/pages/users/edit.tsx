@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useUser, useUpdateUser, useAssignRole, useRemoveRole } from '../../hooks/use-users';
 import { useRoles } from '../../hooks/use-roles';
+import { useAuth } from '../../hooks/use-auth';
 import UserForm from '../../components/user-form';
 import type { CreateUserDto } from '../../types/user';
 
 export default function UsersEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
+  const canAssignRoles = currentUser?.capabilities?.users?.assignRoles ?? false;
   const { data: user, isLoading, error } = useUser(id!);
   const { data: roles } = useRoles();
   const mutation = useUpdateUser();
@@ -61,57 +64,61 @@ export default function UsersEditPage() {
         </div>
       </div>
 
-      <div className="divider" />
+      {canAssignRoles && (
+        <>
+          <div className="divider" />
 
-      <div className="max-w-lg">
-        <h2 className="text-xl font-semibold mb-4">Roles</h2>
+          <div className="max-w-lg">
+            <h2 className="text-xl font-semibold mb-4">Roles</h2>
 
-        {assignMutation.error && (
-          <div className="alert alert-error mb-4">{assignMutation.error.message}</div>
-        )}
+            {assignMutation.error && (
+              <div className="alert alert-error mb-4">{assignMutation.error.message}</div>
+            )}
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          {user?.roles?.length ? (
-            user.roles.map((role) => (
-              <span key={role} className="badge badge-lg gap-2">
-                {role}
-                <button
-                  className="btn btn-ghost btn-xs"
-                  onClick={() => handleRemoveRole(role)}
-                  disabled={removeMutation.isPending}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {user?.roles?.length ? (
+                user.roles.map((role) => (
+                  <span key={role} className="badge badge-lg gap-2">
+                    {role}
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      onClick={() => handleRemoveRole(role)}
+                      disabled={removeMutation.isPending}
+                    >
+                      x
+                    </button>
+                  </span>
+                ))
+              ) : (
+                <p className="opacity-60 text-sm">No roles assigned</p>
+              )}
+            </div>
+
+            {availableRoles.length > 0 && (
+              <div className="flex gap-2">
+                <select
+                  className="select select-bordered flex-1"
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
                 >
-                  x
+                  <option value="">Select a role...</option>
+                  {availableRoles.map((r) => (
+                    <option key={r.role} value={r.role}>{r.role}</option>
+                  ))}
+                </select>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleAssignRole}
+                  disabled={!selectedRole || assignMutation.isPending}
+                >
+                  {assignMutation.isPending && <span className="loading loading-spinner loading-sm" />}
+                  Assign
                 </button>
-              </span>
-            ))
-          ) : (
-            <p className="opacity-60 text-sm">No roles assigned</p>
-          )}
-        </div>
-
-        {availableRoles.length > 0 && (
-          <div className="flex gap-2">
-            <select
-              className="select select-bordered flex-1"
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-            >
-              <option value="">Select a role...</option>
-              {availableRoles.map((r) => (
-                <option key={r.role} value={r.role}>{r.role}</option>
-              ))}
-            </select>
-            <button
-              className="btn btn-primary"
-              onClick={handleAssignRole}
-              disabled={!selectedRole || assignMutation.isPending}
-            >
-              {assignMutation.isPending && <span className="loading loading-spinner loading-sm" />}
-              Assign
-            </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
