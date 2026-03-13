@@ -1,5 +1,12 @@
 import { getStoredToken, clearAuthStorage } from '../services/auth.service';
 
+export class ForbiddenError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ForbiddenError';
+  }
+}
+
 const BASE_URL = '/api';
 
 export async function apiFetch<T>(
@@ -27,6 +34,11 @@ export async function apiFetch<T>(
       window.location.href = '/login';
       throw new Error('Session expired');
     }
+  }
+
+  if (response.status === 403) {
+    const body = await response.json().catch(() => ({}));
+    throw new ForbiddenError(body.message ?? 'You do not have permission to perform this action');
   }
 
   if (!response.ok) {
