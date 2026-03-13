@@ -1,10 +1,26 @@
+export type ResourceCapabilities = {
+  create: boolean;
+  read: boolean;
+  update: boolean;
+  delete: boolean;
+};
+
+export type UsersCapabilities = ResourceCapabilities & {
+  assignRoles: boolean;
+};
+
+export type Capabilities = {
+  stores: ResourceCapabilities;
+  users: UsersCapabilities;
+};
+
 export type User = {
   id: string;
   email: string;
   name: string;
   picture: string;
   roles?: string[];
-  permissions?: string[];
+  capabilities?: Capabilities;
   isTwoFactorEnabled?: boolean;
 };
 
