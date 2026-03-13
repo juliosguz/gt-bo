@@ -7,7 +7,7 @@ const navItems: { to: string; label: string; check?: (c: Capabilities) => boolea
   { to: '/', label: 'Dashboard' },
   { to: '/stores', label: 'Stores', check: (c) => c.stores.read },
   { to: '/users', label: 'Users', check: (c) => c.users.read },
-  { to: '/roles', label: 'Roles' },
+  { to: '/roles', label: 'Roles', check: (c) => c.users.read },
 ];
 
 export default function Layout() {

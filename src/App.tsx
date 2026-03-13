@@ -37,9 +37,11 @@ export default function App() {
           <Route element={<CapabilityRoute check={(c) => c.users.create} />}>
             <Route path="users/new" element={<UsersNewPage />} />
           </Route>
-          <Route path="roles" element={<RolesListPage />} />
-          <Route path="roles/new" element={<RolesNewPage />} />
-          <Route path="roles/:role" element={<RolesDetailPage />} />
+          <Route element={<CapabilityRoute check={(c) => c.users.read} />}>
+            <Route path="roles" element={<RolesListPage />} />
+            <Route path="roles/new" element={<RolesNewPage />} />
+            <Route path="roles/:role" element={<RolesDetailPage />} />
+          </Route>
         </Route>
       </Route>
     </Routes>
